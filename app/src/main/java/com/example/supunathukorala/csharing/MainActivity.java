@@ -12,13 +12,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements View.OnClickListener {
 
     TextView mainText;
     WifiManager wifiManager;
@@ -38,10 +40,10 @@ public class MainActivity extends Activity {
 
         wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 
-        // Check for wifi is disabled
+        // Check for wifiManager is disabled
         if (!wifiManager.isWifiEnabled()) {
 
-            Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled",
+            Toast.makeText(getApplicationContext(), "wifiManager is disabled..making it enabled",
                     Toast.LENGTH_LONG).show();
 
             wifiManager.setWifiEnabled(true);
@@ -73,11 +75,15 @@ public class MainActivity extends Activity {
                 String itemValue = (String) listView.getItemAtPosition(position);
 
                 Toast.makeText(getApplicationContext(),
-                          (position +1) + " Network Name : " + itemValue, Toast.LENGTH_LONG)
+                        (position + 1) + " Network Name : " + itemValue, Toast.LENGTH_LONG)
                         .show();
 
                 WifiConfiguration wifiConfig = new WifiConfiguration();
                 wifiConfig.SSID = wifiList.get(position).SSID;
+                wifiConfig.wepKeys[0] = "\"" + 12345678 + "\"";
+                wifiConfig.wepTxKeyIndex = 0;
+                wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                wifiConfig.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
 
 
                 int netId = wifiManager.addNetwork(wifiConfig);
@@ -85,9 +91,27 @@ public class MainActivity extends Activity {
                 wifiManager.enableNetwork(netId, true);
                 wifiManager.reconnect();
 
+                //WifiConfiguration wifiConfig = new WifiConfiguration();
+                //wifiConfig.SSID = String.format("\"%s\"", ssid);
+                //wifiConfig.preSharedKey = String.format("\"%s\"", key);
+
+                WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
+//remember id
+                netId = wifiManager.addNetwork(wifiConfig);
+                wifiManager.disconnect();
+                wifiManager.enableNetwork(netId, true);
+                wifiManager.reconnect();
+
+                if (wifiManager != null) {
+                    WifiManager.MulticastLock lock = wifiManager.createMulticastLock("mylock");
+                    lock.acquire();
+                }
+
 
             }
         });
+        Button chatButton = (Button) findViewById(R.id.buttonchat);
+        chatButton.setOnClickListener(this);
     }
 
     protected void onPause() {
@@ -95,17 +119,26 @@ public class MainActivity extends Activity {
         super.onPause();
     }
 
+
     protected void onResume() {
         registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         super.onResume();
     }
 
+    @Override
+    public void onClick(View v) {
+        Intent i = new Intent(MainActivity.this,MsgActivity.class);
+        EditText user = (EditText) findViewById(R.id.userName);
+        i.putExtra("name",user.getText().toString());
+        startActivity(i);
+    }
+
     // Broadcast receiver class called its receive method
-    // when number of wifi connections changed
+    // when number of wifiManager connections changed
 
     class WifiReceiver extends BroadcastReceiver {
 
-        // This method call when number of wifi connections changed
+        // This method call when number of wifiManager connections changed
         public void onReceive(Context c, Intent intent) {
 
             sb = new StringBuilder();

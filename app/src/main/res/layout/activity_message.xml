@@ -1,0 +1,71 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="top"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".AudiocastActivity"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="cSharing"
+        android:id="@+id/textView"
+        android:layout_gravity="center_horizontal" />
+
+    <TextView
+        android:layout_width="83dp"
+        android:layout_height="34dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="User Name"
+        android:id="@+id/usrName"
+        android:layout_gravity="center_horizontal" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="182dp"
+        android:id="@+id/listView"
+        android:layout_below="@+id/userName"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="336dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText2" />
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="center_horizontal"
+        android:rowCount="2"
+        android:columnCount="2"
+        android:id="@+id/gridone">
+
+        <Button
+            android:layout_width="128dp"
+            android:layout_height="wrap_content"
+            android:text="share"
+            android:id="@+id/buttonshare"
+            android:layout_gravity="center"
+            android:layout_row="0"
+            android:layout_column="0" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="129dp"
+            android:layout_height="wrap_content"
+            android:text="Send"
+            android:id="@+id/button"
+            android:layout_row="0"
+            android:layout_column="1"
+            android:layout_gravity="center" />
+    </GridLayout>
+
+</LinearLayout>
