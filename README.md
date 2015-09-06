@@ -8,7 +8,7 @@ This application is a chat based file sharing system which runs on android platf
 
 MAIN FEATURES
 
-Send a message
-Send a file
-Private chatting
-Private file sharing
+  Send a message
+  Send a file
+  Private chatting
+  Private file sharing
