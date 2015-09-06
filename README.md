@@ -6,8 +6,9 @@ Nowadays smartphones are becoming more and more related to people’s day to day
 Overall Description
 This application is a chat based file sharing system which runs on android platform and uses mobilephone, Wi-Fi feature.By this application user can chat with connected users within the network public or private. Not only that users can share files within the network in private or public. Private chatting and file sharing is available to the premium users. This application requires permission access to the files manager and internet.
 
-Main features
-1.      Send a message
-2.      Send a file
-3.      Private chatting
-4.      Private file sharing
+MAIN FEATURES
+
+Send a message
+Send a file
+Private chatting
+Private file sharing
