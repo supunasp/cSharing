@@ -26,18 +26,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MsgActivity"
+
+            android:name=".MessageActivity"
             android:label="@string/title_activity_msg" >
         </activity>
         <activity
-            android:name=".MainActivity2"
-            android:label="@string/title_activity_main_activity2" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:name=".FileSharingActivity"
+            android:label="@string/title_activity_file_sharing" >
         </activity>
+
 
     </application>
 

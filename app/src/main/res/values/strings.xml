@@ -7,4 +7,8 @@
     <string name="title_activity_main_activity2">MainActivity2</string>
     <string name="title_activity_msg">MsgActivity</string>
 
+    <string name="title_activity_file_sharing">FileSharingActivity</string>
+    <string name="empty">Empty</string>
+
+
 </resources>
