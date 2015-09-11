@@ -27,7 +27,7 @@
         android:id="@+id/usrName"
         android:layout_gravity="center_horizontal" />
 
-<<<<<<< HEAD
+
     <TextView
         android:id="@+id/infoport"
         android:layout_width="wrap_content"
@@ -40,8 +40,6 @@
         android:layout_height="wrap_content"
         android:textStyle="italic" />
 
-=======
->>>>>>> origin/master
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="182dp"
@@ -77,11 +75,7 @@
             android:layout_width="129dp"
             android:layout_height="wrap_content"
             android:text="Send"
-<<<<<<< HEAD
             android:id="@+id/buttonSend"
-=======
-            android:id="@+id/button"
->>>>>>> origin/master
             android:layout_row="0"
             android:layout_column="1"
             android:layout_gravity="center" />
