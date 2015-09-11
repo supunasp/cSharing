@@ -26,6 +26,7 @@
             </intent-filter>
         </activity>
         <activity
+<<<<<<< HEAD
             android:name=".MessageActivity"
             android:label="@string/title_activity_msg" >
         </activity>
@@ -33,6 +34,21 @@
             android:name=".FileSharingActivity"
             android:label="@string/title_activity_file_sharing" >
         </activity>
+=======
+            android:name=".MsgActivity"
+            android:label="@string/title_activity_msg" >
+        </activity>
+        <activity
+            android:name=".MainActivity2"
+            android:label="@string/title_activity_main_activity2" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+>>>>>>> origin/master
     </application>
 
 </manifest>
