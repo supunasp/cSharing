@@ -3,13 +3,10 @@ package com.example.supunathukorala.csharing;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -19,17 +16,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
-import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -63,6 +55,10 @@ public class MessageActivity extends Activity implements View.OnClickListener {
     ServerSocket serverSocket;
 
     ServerSocketThread serverSocketThread;
+
+    private static final int REQUEST_PATH = 1;
+    String curFileName;
+    EditText edittext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +132,10 @@ public class MessageActivity extends Activity implements View.OnClickListener {
         Button shareButton = (Button) findViewById(R.id.buttonshare);
         shareButton.setOnClickListener(this);
 
+        Button selectButton = (Button) findViewById(R.id.buttonSelect);
+        selectButton.setOnClickListener(this);
+        edittext = (EditText)findViewById(R.id.editText);
+
         //---------------------------------------------------------server
 
         infoIp.setText("Local Address : "+getIpAddress());
@@ -176,6 +176,11 @@ public class MessageActivity extends Activity implements View.OnClickListener {
                 intent.putExtra("username",username);
                 startActivityForResult(intent,SHARE_PICTURE);
 
+                break;
+            case R.id.buttonSelect:
+
+                Intent intent1 = new Intent(this, FileChooser.class);
+                startActivityForResult(intent1,REQUEST_PATH);
                 break;
         }
     }
@@ -327,10 +332,11 @@ public class MessageActivity extends Activity implements View.OnClickListener {
             this.socket=socket;
         }
 
+       
         @Override
         public void run() {
 
-            File file;
+            File file = null;
             ObjectInputStream ois;
             ois = null;
             InputStream in = null;
@@ -347,17 +353,21 @@ public class MessageActivity extends Activity implements View.OnClickListener {
                 boolean result = false;
 
                 try{
-                    theDir.mkdir();
+                    theDir.mkdir()
                     result = true;
                 }
-                catch(SecurityException se){
+                catch(SecurityException ignored){
                 }
                 if(result) {
                     System.out.println("DIR created");
                 }
             }
             int length = new File(Environment.getExternalStorageDirectory() + "/cSharing").listFiles().length;
-            file = new File(Environment.getExternalStorageDirectory()+"/cSharing", "test"+(length+1)+".png");
+            String fileName= "test"+(length+1)+".png";
+
+
+
+
             try {
                     in = socket.getInputStream();
                 } catch (IOException ex) {
@@ -368,8 +378,16 @@ public class MessageActivity extends Activity implements View.OnClickListener {
             } catch (IOException e1) {
                 System.out.println("Can't get Object Input Stream. ");
                 e1.printStackTrace();
-
             }
+
+            try {
+                assert ois != null;
+                fileName = ois.readUTF();
+            } catch (IOException e) {
+                System.out.println("Can't get file name. ");
+                e.printStackTrace();
+            }
+            file = new File(Environment.getExternalStorageDirectory()+"/cSharing",fileName );
             try {
                 assert ois != null;
                 bytes = (byte[])ois.readObject();
@@ -422,4 +440,14 @@ public class MessageActivity extends Activity implements View.OnClickListener {
                 }
             }
         }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        // See which child activity is calling us back.
+        if (requestCode == REQUEST_PATH){
+            if (resultCode == RESULT_OK) {
+                curFileName = data.getStringExtra("GetFileName");
+                edittext.setText(curFileName);
+            }
+        }
+    }
     }

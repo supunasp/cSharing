@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -26,7 +27,6 @@
             </intent-filter>
         </activity>
         <activity
-
             android:name=".MessageActivity"
             android:label="@string/title_activity_msg" >
         </activity>
@@ -34,8 +34,14 @@
             android:name=".FileSharingActivity"
             android:label="@string/title_activity_file_sharing" >
         </activity>
-
-
+        <activity
+            android:name=".FileChooser"
+            android:label="@string/title_activity_file_chooser" >
+        </activity>
+        <activity
+            android:name=".PrivateChatActivity"
+            android:label="@string/title_activity_private_chat" >
+        </activity>
     </application>
 
 </manifest>

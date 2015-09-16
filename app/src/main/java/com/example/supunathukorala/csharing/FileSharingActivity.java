@@ -1,16 +1,16 @@
 package com.example.supunathukorala.csharing;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,8 +28,6 @@ import static android.provider.MediaStore.Images;
 public class FileSharingActivity extends Activity {
 
     private static final int SELECT_PICTURE = 1;
-    private static final int SEND_PICTURE = 2;
-    public static final String TAG = "wifidirectdemo";
     private String username;
 
     Uri newImageUri;
@@ -41,7 +39,6 @@ public class FileSharingActivity extends Activity {
 
     //-------------- Client
 
-    Button buttonConnect;
     TextView textPort;
 
     static final int SocketServerPORT = 8080;
@@ -68,17 +65,17 @@ public class FileSharingActivity extends Activity {
         if (resultCode == RESULT_OK) {
             if (requestCode == SELECT_PICTURE) {
                 Uri selectedImageUri = data.getData();
-                selectImage sendImage = new selectImage(selectedImageUri);
+                selectClient sendImage = new selectClient(selectedImageUri);
                 sendImage.execute((Void) null);
             }
         }
     }
 
-    private class selectImage extends AsyncTask<Void, Void, Boolean> {
+    private class selectClient extends AsyncTask<Void, Void, Boolean> {
 
         Uri imageUri;
 
-        selectImage(Uri selectedImageUri) {
+        selectClient(Uri selectedImageUri) {
             imageUri = selectedImageUri;
             newImageUri=selectedImageUri;
 
@@ -87,7 +84,6 @@ public class FileSharingActivity extends Activity {
         @Override
         protected Boolean doInBackground(Void... params) {
 
-            final String selectedImagePath = getPath(imageUri);
             final ArrayList<ClientScanResult> clients = wifiApManager.getClientList(false);
 
 
@@ -135,21 +131,12 @@ public class FileSharingActivity extends Activity {
         @Override
         protected Boolean doInBackground(Void... params) {
 
-            String[] filePathColumn = {MediaStore.Images.Media.DATA};
-
-            Cursor cursor = getContentResolver().query(
-                    selectedImage, filePathColumn, null, null, null);
-            cursor.moveToFirst();
-
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            String filePath = cursor.getString(columnIndex);
-            cursor.close();
-
-            ClientRxThread clientRxThread =
-                    new ClientRxThread(
-                            ipAddress,
-                            SocketServerPORT);
+            ClientRxThread clientRxThread = new ClientRxThread(ipAddress, SocketServerPORT);
             clientRxThread.start();
+
+            Intent intent = new Intent(FileSharingActivity.this,MessageActivity.class);
+            intent.putExtra("name", username);
+            startActivity(intent);
 
 
             return true;
@@ -177,7 +164,7 @@ public class FileSharingActivity extends Activity {
 
         @Override
         public void run() {
-            Socket socket = null;
+            Socket socket;
 
             try {
                 socket = new Socket(dstAddress, dstPort);
@@ -198,30 +185,32 @@ public class FileSharingActivity extends Activity {
             this.socket= socket;
         }
 
+        @TargetApi(Build.VERSION_CODES.KITKAT)
         @Override
         public void run() {
             File file = new File(getPath(newImageUri));
 
+            String fileName = file.getName();
+
+
             byte[] bytes = new byte[(int) file.length()];
             BufferedInputStream bis;
+
             try {
                 bis = new BufferedInputStream(new FileInputStream(file));
-                final int read = bis.read(bytes, 0, bytes.length);
+                 bis.read(bytes, 0, bytes.length);
 
                 ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                oos.writeUTF(fileName);
                 oos.writeObject(bytes);
                 oos.flush();
-
                 socket.close();
 
                 final String sentMsg = "File sent to: " + socket.getInetAddress();
                 FileSharingActivity.this.runOnUiThread(new Runnable() {
-
                     @Override
                     public void run() {
-                        Toast.makeText(FileSharingActivity.this,
-                                sentMsg,
-                                Toast.LENGTH_LONG).show();
+                        Toast.makeText(FileSharingActivity.this, sentMsg, Toast.LENGTH_LONG).show();
                     }});
 
             } catch (IOException e) {

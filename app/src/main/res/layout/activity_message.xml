@@ -7,7 +7,6 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".AudiocastActivity"
     android:orientation="vertical"
     android:weightSum="1">
 
@@ -26,7 +25,6 @@
         android:text="User Name"
         android:id="@+id/usrName"
         android:layout_gravity="center_horizontal" />
-
 
     <TextView
         android:id="@+id/infoport"
@@ -79,6 +77,32 @@
             android:layout_row="0"
             android:layout_column="1"
             android:layout_gravity="center" />
+    </GridLayout>
+
+    <GridLayout
+        android:layout_width="284dp"
+        android:layout_height="47dp"
+        android:layout_gravity="center_horizontal"
+        android:rowCount="1"
+        android:id="@+id/selectGrid"
+        android:columnCount="2">
+
+        <EditText
+            android:layout_width="161dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText"
+            android:layout_row="0"
+            android:layout_column="0" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="select File"
+            android:id="@+id/buttonSelect"
+            android:layout_gravity="center_horizontal"
+            android:layout_row="0"
+            android:layout_column="1" />
     </GridLayout>
 
 </LinearLayout>
