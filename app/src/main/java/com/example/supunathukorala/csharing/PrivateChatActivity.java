@@ -41,26 +41,22 @@ public class PrivateChatActivity extends Activity implements View.OnClickListene
     static final int SocketServerPORT = 8080;
     private static final int SHARE_PICTURE = 2;
     private static final int REQUEST_PATH = 1;
-    TextView infoIp, infoPort;
-    String curFileName;
-    EditText edittext;
-    WifiManager wifi;
-    ServerSocket serverSocket = null;
-    ServerSocket fileServerSocket;
-    FileReceiverThread fileReceiverThread;
-    Socket clientSocket;
-    String clientIpAddress;
-    String message;
-    PrintWriter outp = null;
-    BufferedReader inp = null;
-    String serverMsg = null;
-    Thread serverThread = null;
-    Thread startClient;
+    private TextView infoPort;
+    private EditText edittext;
+    private WifiManager wifi;
+    private ServerSocket serverSocket = null;
+    private ServerSocket fileServerSocket;
+    private FileReceiverThread fileReceiverThread;
+    private Socket clientSocket;
+    private String clientIpAddress;
+    private PrintWriter outp = null;
+    private BufferedReader inp = null;
     private ArrayList<String> recQue;
     private String[] values;
     private ArrayAdapter adapter;
     private ListView listView;
     private String username;
+    private Button connectClientButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +71,7 @@ public class PrivateChatActivity extends Activity implements View.OnClickListene
         userNm.setText(username);
 
 
-        infoIp = (TextView) findViewById(R.id.infoip);
+        TextView infoIp = (TextView) findViewById(R.id.infoip);
         infoPort = (TextView) findViewById(R.id.infoport);
 
 
@@ -95,16 +91,13 @@ public class PrivateChatActivity extends Activity implements View.OnClickListene
         selectButton.setOnClickListener(this);
         edittext = (EditText) findViewById(R.id.editText);
 
-        Button startServerButton = (Button) findViewById(R.id.buttonstartServer);
-        startServerButton.setOnClickListener(this);
-
-        Button connectClientButton = (Button) findViewById(R.id.buttonconnectClient);
+        connectClientButton = (Button) findViewById(R.id.buttonconnectClient);
         connectClientButton.setOnClickListener(this);
 
         infoIp.setText("Local Address : " + getIpAddress());
 
-        this.serverThread = new Thread(new chatReceiver());
-        this.serverThread.start();
+        Thread serverThread = new Thread(new chatReceiver());
+        serverThread.start();
 
         fileReceiverThread = new FileReceiverThread();
         fileReceiverThread.start();
@@ -136,15 +129,10 @@ public class PrivateChatActivity extends Activity implements View.OnClickListene
                 startActivityForResult(intent1, REQUEST_PATH);
                 break;
 
-       /*     case R.id.buttonstartServer:
-
-
-                break;*/
-
             case R.id.buttonconnectClient:
 
-                this.startClient = new Thread(new chatSender());
-                this.startClient.start();
+                Thread startClient = new Thread(new chatSender());
+                startClient.start();
                 break;
         }
     }
@@ -245,8 +233,9 @@ public class PrivateChatActivity extends Activity implements View.OnClickListene
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_PATH) {
             if (resultCode == RESULT_OK) {
-                curFileName = data.getStringExtra("GetFileName");
-                edittext.setText(curFileName);
+                String curFileName = data.getStringExtra("GetFileName");
+                String curFilePath = data.getStringExtra("GetPath");
+                edittext.setText(curFilePath+curFileName);
             }
         }
     }
@@ -262,13 +251,22 @@ public class PrivateChatActivity extends Activity implements View.OnClickListene
 
                 outp = new PrintWriter(clientSocket.getOutputStream(), true);
                 inp = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                serverMsg = inp.readLine();
                 System.out.println(clientSocket.getInetAddress().getHostAddress() + " is ther server");
                 updateUIToast(clientSocket.getInetAddress().getHostAddress() + " is ther server");
             } catch (IOException e) {
                 e.printStackTrace();
                 updateUIToast(e.toString());
 
+            }
+
+            if(clientSocket != null){
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        connectClientButton.setVisibility(View.GONE);
+                    }
+                });
             }
 
 
@@ -312,10 +310,11 @@ public class PrivateChatActivity extends Activity implements View.OnClickListene
                 }
                 System.out.println("Creating thread ...");
 
-                assert socket != null;
+                if( socket != null){
                 updateUI(getIpAddress(), socket.getInetAddress().getHostName());
                 Thread t = new chatReceiveHandler(socket, nreq);
                 t.start();
+                }
             }
         }
     }
@@ -468,6 +467,15 @@ public class PrivateChatActivity extends Activity implements View.OnClickListene
             try {
                 assert fos != null;
                 fos.write(bytes);
+                PrivateChatActivity.this.runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        Toast.makeText(PrivateChatActivity.this, "Finished", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                recQue.add(fileName);
+                updateListView(fileName);
             } catch (IOException e1) {
                 System.out.println("Can't file output stream write . ");
                 e1.printStackTrace();
@@ -481,13 +489,7 @@ public class PrivateChatActivity extends Activity implements View.OnClickListene
                     }
                 }
             }
-            PrivateChatActivity.this.runOnUiThread(new Runnable() {
 
-                @Override
-                public void run() {
-                    Toast.makeText(PrivateChatActivity.this, "Finished", Toast.LENGTH_SHORT).show();
-                }
-            });
             if (socket != null) {
                 try {
                     socket.close();

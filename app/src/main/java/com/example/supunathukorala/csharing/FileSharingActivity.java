@@ -55,7 +55,7 @@ public class FileSharingActivity extends Activity {
         wifiApManager = new WifiApiManager(this);
         listView = (ListView) findViewById(R.id.listView2);
 
-        username = (String) getIntent().getExtras().get("username");
+        username = (String) getIntent().getExtras().get("name");
         Intent i = new Intent(Intent.ACTION_PICK, Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(Intent.createChooser(i, "Select Picture"), SELECT_PICTURE);
 

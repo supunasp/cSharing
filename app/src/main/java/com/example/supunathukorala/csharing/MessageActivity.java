@@ -45,11 +45,14 @@ public class MessageActivity extends Activity implements View.OnClickListener {
     static final int SocketServerPORT = 8080;
     private static final int SHARE_PICTURE = 2;
     private static final int REQUEST_PATH = 1;
+    private static final int TIMEOUT = 3000;
+    private static final int MAXFILELEN = 65000;
+
     final int portNum = 3238;
     InetAddress ip = null;
     NetworkInterface networkInterface = null;
     ServerSocket serverSocket;
-    ServerSocketThread serverSocketThread;
+    FileReciveThread fileReciveThread;
     String curFileName;
     EditText edittext;
     private ArrayList<String> recQue;
@@ -58,6 +61,8 @@ public class MessageActivity extends Activity implements View.OnClickListener {
     private ArrayAdapter adapter;
     private MulticastSocket socket;
     private InetAddress group;
+    private MulticastSocket fileSocket;
+    private InetAddress fileGroup;
     private String username;
 
     @Override
@@ -113,13 +118,19 @@ public class MessageActivity extends Activity implements View.OnClickListener {
 
                 group = InetAddress.getByName("224.0.0.1");
                 socket.joinGroup(new InetSocketAddress(group, portNum), networkInterface);
+
+                fileSocket = new MulticastSocket(portNum+1);
+                fileSocket.setInterface(ip);
+                fileSocket.setBroadcast(true);
+
+                fileGroup = InetAddress.getByName("224.0.0.2");
+                fileSocket.joinGroup(new InetSocketAddress(fileGroup, (portNum+1)), networkInterface);
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
-        receiverMeg recvMsgThread = new receiverMeg(recQue);
+        receiverMessage recvMsgThread = new receiverMessage(recQue);
         recvMsgThread.execute((Void) null);
         Button send = (Button) findViewById(R.id.buttonSend);
         send.setOnClickListener(this);
@@ -131,8 +142,8 @@ public class MessageActivity extends Activity implements View.OnClickListener {
         edittext = (EditText) findViewById(R.id.editText);
 
         //---------------------------------------------------------server
-        serverSocketThread = new ServerSocketThread();
-        serverSocketThread.start();
+        fileReciveThread = new FileReciveThread();
+        fileReciveThread.start();
     }
 
     @Override
@@ -143,7 +154,6 @@ public class MessageActivity extends Activity implements View.OnClickListener {
             try {
                 serverSocket.close();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -153,8 +163,8 @@ public class MessageActivity extends Activity implements View.OnClickListener {
     protected void onResume() {
         super.onResume();
 
-        serverSocketThread = new ServerSocketThread();
-        serverSocketThread.start();
+        fileReciveThread = new FileReciveThread();
+        fileReciveThread.start();
 
         try {
             socket = new MulticastSocket(portNum);
@@ -182,7 +192,7 @@ public class MessageActivity extends Activity implements View.OnClickListener {
                 break;
             case R.id.buttonshare:
                 Intent intent = new Intent(MessageActivity.this, FileSharingActivity.class);
-                intent.putExtra("username", username);
+                intent.putExtra("name", username);
                 startActivityForResult(intent, SHARE_PICTURE);
 
                 break;
@@ -222,17 +232,17 @@ public class MessageActivity extends Activity implements View.OnClickListener {
         // See which child activity is calling us back.
         if (requestCode == REQUEST_PATH) {
             if (resultCode == RESULT_OK) {
-                curFileName = data.getStringExtra("GetFileName");
                 curFileName = data.getStringExtra("GetPath");
+                curFileName += data.getStringExtra("GetFileName");
                 edittext.setText(curFileName);
             }
         }
     }
 
-    private class receiverMeg extends AsyncTask<Void, Void, Boolean> {
+    private class receiverMessage extends AsyncTask<Void, Void, Boolean> {
         ArrayList<String> msgList;
 
-        receiverMeg(ArrayList<String> msgList) {
+        receiverMessage(ArrayList<String> msgList) {
             recQue = msgList;
             this.msgList = msgList;
         }
@@ -254,23 +264,7 @@ public class MessageActivity extends Activity implements View.OnClickListener {
 
                         final String medd = new String(recvPkt, 0, recv.getLength());
                         recQue.add(medd);
-                        values = new String[recQue.size()];
-                        for (int x = 0; x < recQue.size(); x++) {
-                            values[x] = recQue.get(x);
-                        }
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                /**
-                                 *   If the network is not available
-                                 * */
-                                Toast.makeText(getApplicationContext(), medd + " : " + recQue.size(), Toast.LENGTH_SHORT).show();
-                                adapter = new ArrayAdapter<>(MessageActivity.this, R.layout.list_white_text, R.id.list_content, values);
-                                listView.setAdapter(adapter);
-                                listView.setSelection(adapter.getCount() - 1);
-                            }
-                        });
-                        Log.d("cSharing", "received : " + medd);
+                        updateListView(medd);
                     }
                 }
             };
@@ -304,7 +298,7 @@ public class MessageActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    public class ServerSocketThread extends Thread {
+    public class FileReciveThread extends Thread {
 
         @Override
         public void run() {
@@ -317,8 +311,8 @@ public class MessageActivity extends Activity implements View.OnClickListener {
                     socket = serverSocket.accept();
 
                     //---------------------------------
-                    ClientRxThread clientRxThread = new ClientRxThread(socket);
-                    clientRxThread.start();
+                    FileReciverThreadHandler fileReciverThreadHandler = new FileReciverThreadHandler(socket);
+                    fileReciverThreadHandler.start();
                     //----------------------------------------
                 }
             } catch (IOException e) {
@@ -336,11 +330,11 @@ public class MessageActivity extends Activity implements View.OnClickListener {
 
     }
 
-    private class ClientRxThread extends Thread {
+    private class FileReciverThreadHandler extends Thread {
         Socket socket = null;
 
 
-        ClientRxThread(Socket socket) {
+        FileReciverThreadHandler(Socket socket) {
             this.socket = socket;
         }
 
@@ -417,6 +411,15 @@ public class MessageActivity extends Activity implements View.OnClickListener {
             try {
                 assert fos != null;
                 fos.write(bytes);
+                MessageActivity.this.runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        Toast.makeText(MessageActivity.this, "Finished", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                recQue.add(fileName);
+                updateListView(fileName);
             } catch (IOException e1) {
                 System.out.println("Can't file output stream write . ");
                 e1.printStackTrace();
@@ -430,21 +433,31 @@ public class MessageActivity extends Activity implements View.OnClickListener {
                     }
                 }
             }
-            MessageActivity.this.runOnUiThread(new Runnable() {
 
-                @Override
-                public void run() {
-                    Toast.makeText(MessageActivity.this, "Finished", Toast.LENGTH_SHORT).show();
-                }
-            });
-            if (socket != null) {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+            if (socket != null) try {
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
+    }
+
+    private void updateListView(final String message) {
+
+        values = new String[recQue.size()];
+        for (int x = 0; x < recQue.size(); x++) {
+            values[x] = recQue.get(x);
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), message + " : " + recQue.size(), Toast.LENGTH_SHORT).show();
+                adapter = new ArrayAdapter<>(MessageActivity.this, R.layout.list_white_text, R.id.list_content, values);
+                listView.setAdapter(adapter);
+                listView.setSelection(adapter.getCount() - 1);
+            }
+        });
+        Log.d("cSharing", "Send : " + message);
+
     }
 }
