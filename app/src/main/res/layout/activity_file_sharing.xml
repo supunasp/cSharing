@@ -25,6 +25,14 @@
         android:layout_height="wrap_content" />
 
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Select user to Send"
+        android:textColor="#f6f4ff"
+        android:id="@+id/textView3"
+        android:layout_gravity="center_horizontal" />
 
     <ListView
         android:id="@+id/listView2"

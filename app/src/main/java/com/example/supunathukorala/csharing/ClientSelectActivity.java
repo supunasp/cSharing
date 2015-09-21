@@ -43,7 +43,7 @@ public class ClientSelectActivity  extends Activity {
         wifiApManager = new WifiApiManager(this);
         listView = (ListView) findViewById(R.id.listView2);
 
-        username = (String) getIntent().getExtras().get("username");
+        username = (String) getIntent().getExtras().get("name");
 
         textPort = (TextView) findViewById(R.id.port);
         textPort.setText("port: " + SocketServerPORT);

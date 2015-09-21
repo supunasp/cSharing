@@ -28,54 +28,12 @@
 
     <TextView
         android:layout_width="83dp"
-        android:layout_height="34dp"
+        android:layout_height="26dp"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/userName"
         android:textColor="#f6f4ff"
         android:id="@+id/usrName"
         android:layout_gravity="center_horizontal" />
-
-    <GridLayout
-        android:layout_width="match_parent"
-        android:layout_height="47dp"
-        android:layout_gravity="center_horizontal"
-        android:rowCount="1"
-        android:columnCount="2"
-        android:id="@+id/serverClient"
-        android:orientation="horizontal">
-
-        <Button
-            android:layout_width="192dp"
-            android:layout_height="wrap_content"
-            android:text="@string/startServer"
-            android:id="@+id/buttonstartServer"
-            android:layout_row="0"
-            android:layout_column="0"
-            android:layout_gravity="center_horizontal"
-            style="?android:textAppearanceSmall"
-            android:layout_marginTop="16dp"
-            android:textStyle="bold"
-            android:background="@drawable/btn_live_dark"
-            android:textSize="20sp"
-            android:fontFamily="sans-serif-condensed"
-            android:textColor="#000"/>
-
-        <Button
-            android:layout_width="192dp"
-            android:layout_height="wrap_content"
-            android:text="@string/connectClient"
-            android:id="@+id/buttonconnectClient"
-            android:layout_row="0"
-            android:layout_column="1"
-            android:layout_gravity="center_horizontal"
-            style="?android:textAppearanceSmall"
-            android:layout_marginTop="16dp"
-            android:textStyle="bold"
-            android:background="@drawable/btn_live_dark"
-            android:textSize="20sp"
-            android:fontFamily="sans-serif-condensed"
-            android:textColor="#000"/>
-    </GridLayout>
 
     <TextView
         android:id="@+id/infoport"
@@ -93,9 +51,9 @@
 
     <ListView
         android:layout_width="wrap_content"
-        android:layout_height="182dp"
+        android:layout_height="174dp"
         android:id="@+id/listView"
-        android:textColor="#f6f4ff"/>
+        android:textColor="#f6f4ff" />
 
     <EditText
         android:layout_width="match_parent"
@@ -107,7 +65,6 @@
     <GridLayout
         android:layout_width="wrap_content"
         android:layout_height="60dp"
-        android:layout_gravity="center_horizontal"
         android:rowCount="2"
         android:columnCount="2"
         android:id="@+id/gridone">
@@ -164,7 +121,7 @@
 
         <Button
             style="?android:attr/buttonStyleSmall"
-            android:layout_width="192dp"
+            android:layout_width="170dp"
             android:layout_height="wrap_content"
             android:text="@string/selectFile"
             android:id="@+id/buttonSelect"
@@ -178,5 +135,19 @@
             android:fontFamily="sans-serif-condensed"
             android:textColor="#000"/>
     </GridLayout>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="26dp"
+        android:text="@string/connectClient"
+        android:id="@+id/buttonconnectClient"
+        android:layout_row="0"
+        android:layout_column="1"
+        style="?android:textAppearanceSmall"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/btn_live_dark"
+        android:textSize="20sp"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="#000"/>
 
 </LinearLayout>
