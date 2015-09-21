@@ -16,6 +16,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.supunathukorala.csharing.filebrowser.FileChooser;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -37,28 +39,26 @@ import java.util.Enumeration;
 /**
  * @author (C) Dushk
  */
+@SuppressWarnings("ALL")
 public class MessageActivity extends Activity implements View.OnClickListener {
 
-    private static final int SHARE_PICTURE = 2;
-    final int portNum = 3238;
-    private ArrayList<String> recQue;
-    private String[] values;
-    private MulticastSocket socket;
-    private InetAddress group;
-    private ListView listView;
-    private ArrayAdapter adapter;
-    private String username;
-
-    TextView infoIp, infoPort;
-
     static final int SocketServerPORT = 8080;
-    ServerSocket serverSocket;
-
-    ServerSocketThread serverSocketThread;
-
+    private static final int SHARE_PICTURE = 2;
     private static final int REQUEST_PATH = 1;
+    final int portNum = 3238;
+    InetAddress ip = null;
+    NetworkInterface networkInterface = null;
+    ServerSocket serverSocket;
+    ServerSocketThread serverSocketThread;
     String curFileName;
     EditText edittext;
+    private ArrayList<String> recQue;
+    private String[] values;
+    private ListView listView;
+    private ArrayAdapter adapter;
+    private MulticastSocket socket;
+    private InetAddress group;
+    private String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,12 +66,7 @@ public class MessageActivity extends Activity implements View.OnClickListener {
         setContentView(R.layout.activity_message);
 
         username = (String) getIntent().getExtras().get("name");
-
         TextView userNm = (TextView) findViewById(R.id.usrName);
-
-        infoIp = (TextView) findViewById(R.id.infoip);
-        infoPort = (TextView) findViewById(R.id.infoport);
-
         userNm.setText(username);
 
         listView = (ListView) findViewById(R.id.listView);
@@ -84,7 +79,7 @@ public class MessageActivity extends Activity implements View.OnClickListener {
             lock.acquire();
         } else {
             Log.e("cSharing", "Unable to acquire multicast lock");
-            Toast.makeText(getApplicationContext(),  "Unable to acquire multicast lock" , Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Unable to acquire multicast lock", Toast.LENGTH_SHORT).show();
 
             finish();
         }
@@ -92,33 +87,32 @@ public class MessageActivity extends Activity implements View.OnClickListener {
 
         try {
             if (socket == null) {
-                String ip=null;
-                NetworkInterface networkInterface = null;
+
 
                 Enumeration<NetworkInterface> enumNetworkInterfaces = NetworkInterface.getNetworkInterfaces();
                 while (enumNetworkInterfaces.hasMoreElements()) {
 
-                     networkInterface = enumNetworkInterfaces.nextElement();
+                    networkInterface = enumNetworkInterfaces.nextElement();
                     Enumeration<InetAddress> enumInetAddress = networkInterface.getInetAddresses();
 
                     while (enumInetAddress.hasMoreElements()) {
                         InetAddress inetAddress = enumInetAddress.nextElement();
 
                         if (inetAddress.isSiteLocalAddress()) {
-                             ip = inetAddress.getHostAddress();
+                            ip = inetAddress;
                             break;
                         }
                     }
-                    if (ip !=null){
+                    if (ip != null) {
                         break;
                     }
                 }
                 socket = new MulticastSocket(portNum);
-                socket.setInterface(InetAddress.getByName(getIpAddress()));
+                socket.setInterface(ip);
                 socket.setBroadcast(true);
 
                 group = InetAddress.getByName("224.0.0.1");
-                socket.joinGroup(new InetSocketAddress(group, portNum),networkInterface);
+                socket.joinGroup(new InetSocketAddress(group, portNum), networkInterface);
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -134,16 +128,11 @@ public class MessageActivity extends Activity implements View.OnClickListener {
 
         Button selectButton = (Button) findViewById(R.id.buttonSelect);
         selectButton.setOnClickListener(this);
-        edittext = (EditText)findViewById(R.id.editText);
+        edittext = (EditText) findViewById(R.id.editText);
 
         //---------------------------------------------------------server
-
-        infoIp.setText("Local Address : "+getIpAddress());
-
         serverSocketThread = new ServerSocketThread();
         serverSocketThread.start();
-
-
     }
 
     @Override
@@ -160,6 +149,26 @@ public class MessageActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        serverSocketThread = new ServerSocketThread();
+        serverSocketThread.start();
+
+        try {
+            socket = new MulticastSocket(portNum);
+            socket.setInterface(ip);
+            socket.setBroadcast(true);
+
+            group = InetAddress.getByName("224.0.0.1");
+            socket.joinGroup(new InetSocketAddress(group, portNum), networkInterface);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 
     @Override
     public void onClick(View view) {
@@ -172,16 +181,51 @@ public class MessageActivity extends Activity implements View.OnClickListener {
                 sendMessage.execute((Void) null);
                 break;
             case R.id.buttonshare:
-                Intent intent = new Intent(MessageActivity.this,FileSharingActivity.class);
-                intent.putExtra("username",username);
-                startActivityForResult(intent,SHARE_PICTURE);
+                Intent intent = new Intent(MessageActivity.this, FileSharingActivity.class);
+                intent.putExtra("username", username);
+                startActivityForResult(intent, SHARE_PICTURE);
 
                 break;
             case R.id.buttonSelect:
 
                 Intent intent1 = new Intent(this, FileChooser.class);
-                startActivityForResult(intent1,REQUEST_PATH);
+                startActivityForResult(intent1, REQUEST_PATH);
                 break;
+        }
+    }
+
+    private String getIpAddress() {
+        String ip = "";
+        try {
+            Enumeration<NetworkInterface> enumNetworkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (enumNetworkInterfaces.hasMoreElements()) {
+
+                NetworkInterface networkInterface = enumNetworkInterfaces.nextElement();
+                Enumeration<InetAddress> enumInetAddress = networkInterface.getInetAddresses();
+
+                while (enumInetAddress.hasMoreElements()) {
+                    InetAddress inetAddress = enumInetAddress.nextElement();
+
+                    if (inetAddress.isSiteLocalAddress()) {
+                        ip += inetAddress.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+            ip += "Something Wrong! " + e.toString() + "\n";
+        }
+        return ip;
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // See which child activity is calling us back.
+        if (requestCode == REQUEST_PATH) {
+            if (resultCode == RESULT_OK) {
+                curFileName = data.getStringExtra("GetFileName");
+                curFileName = data.getStringExtra("GetPath");
+                edittext.setText(curFileName);
+            }
         }
     }
 
@@ -221,7 +265,7 @@ public class MessageActivity extends Activity implements View.OnClickListener {
                                  *   If the network is not available
                                  * */
                                 Toast.makeText(getApplicationContext(), medd + " : " + recQue.size(), Toast.LENGTH_SHORT).show();
-                                adapter = new ArrayAdapter<>(MessageActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, values);
+                                adapter = new ArrayAdapter<>(MessageActivity.this, R.layout.list_white_text, R.id.list_content, values);
                                 listView.setAdapter(adapter);
                                 listView.setSelection(adapter.getCount() - 1);
                             }
@@ -248,8 +292,6 @@ public class MessageActivity extends Activity implements View.OnClickListener {
         protected Boolean doInBackground(Void... params) {
 
             byte[] data = textMsg.getBytes();
-
-            //    Create and send a packet
             DatagramPacket packet = new DatagramPacket(data, data.length, group, portNum);
 
             try {
@@ -262,30 +304,6 @@ public class MessageActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    private String getIpAddress() {
-        String ip = "";
-        try {
-            Enumeration<NetworkInterface> enumNetworkInterfaces = NetworkInterface.getNetworkInterfaces();
-            while (enumNetworkInterfaces.hasMoreElements()) {
-
-                NetworkInterface networkInterface = enumNetworkInterfaces.nextElement();
-                Enumeration<InetAddress> enumInetAddress = networkInterface.getInetAddresses();
-
-                while (enumInetAddress.hasMoreElements()) {
-                    InetAddress inetAddress = enumInetAddress.nextElement();
-
-                    if (inetAddress.isSiteLocalAddress()) {
-                        ip += inetAddress.getHostAddress();
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            e.printStackTrace();
-            ip += "Something Wrong! " + e.toString() + "\n";
-        }
-        return ip;
-    }
-
     public class ServerSocketThread extends Thread {
 
         @Override
@@ -293,13 +311,7 @@ public class MessageActivity extends Activity implements View.OnClickListener {
             Socket socket = null;
             try {
                 serverSocket = new ServerSocket(SocketServerPORT);
-                MessageActivity.this.runOnUiThread(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        infoPort.setText("I'm waiting here: "
-                                + serverSocket.getLocalPort());
-                    }});
 
                 while (true) {
                     socket = serverSocket.accept();
@@ -329,14 +341,14 @@ public class MessageActivity extends Activity implements View.OnClickListener {
 
 
         ClientRxThread(Socket socket) {
-            this.socket=socket;
+            this.socket = socket;
         }
 
-       
+
         @Override
         public void run() {
 
-            File file = null;
+            File file;
             ObjectInputStream ois;
             ois = null;
             InputStream in = null;
@@ -352,27 +364,24 @@ public class MessageActivity extends Activity implements View.OnClickListener {
                 System.out.println("creating directory: " + "cSharing");
                 boolean result = false;
 
-                try{
-                    theDir.mkdir()
+                try {
+                    theDir.mkdir();
                     result = true;
+                } catch (SecurityException ignored) {
                 }
-                catch(SecurityException ignored){
-                }
-                if(result) {
+                if (result) {
                     System.out.println("DIR created");
                 }
             }
             int length = new File(Environment.getExternalStorageDirectory() + "/cSharing").listFiles().length;
-            String fileName= "test"+(length+1)+".png";
-
-
+            String fileName = "test" + (length + 1) + ".png";
 
 
             try {
-                    in = socket.getInputStream();
-                } catch (IOException ex) {
-                    System.out.println("Can't get socket input stream. ");
-                }
+                in = socket.getInputStream();
+            } catch (IOException ex) {
+                System.out.println("Can't get socket input stream. ");
+            }
             try {
                 ois = new ObjectInputStream(in);
             } catch (IOException e1) {
@@ -387,15 +396,15 @@ public class MessageActivity extends Activity implements View.OnClickListener {
                 System.out.println("Can't get file name. ");
                 e.printStackTrace();
             }
-            file = new File(Environment.getExternalStorageDirectory()+"/cSharing",fileName );
+            file = new File(Environment.getExternalStorageDirectory() + "/cSharing", fileName);
             try {
                 assert ois != null;
-                bytes = (byte[])ois.readObject();
+                bytes = (byte[]) ois.readObject();
             } catch (ClassNotFoundException | IOException e) {
                 System.out.println("Can't read Object . ");
-                bytes= new byte[0];
-                    e.printStackTrace();
-                }
+                bytes = new byte[0];
+                e.printStackTrace();
+            }
 
             try {
                 fos = new FileOutputStream(file);
@@ -411,43 +420,31 @@ public class MessageActivity extends Activity implements View.OnClickListener {
             } catch (IOException e1) {
                 System.out.println("Can't file output stream write . ");
                 e1.printStackTrace();
-            }
-            finally {
-                    if(fos!=null){
+            } finally {
+                if (fos != null) {
 
-                        try {
-                            fos.close();
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                        }
-                    }
-                }
-                MessageActivity.this.runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Toast.makeText(MessageActivity.this,
-                                "Finished",
-                                Toast.LENGTH_LONG).show();
-                    }});
-                if(socket != null){
                     try {
-                        socket.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        fos.close();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
                     }
                 }
             }
-        }
+            MessageActivity.this.runOnUiThread(new Runnable() {
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        // See which child activity is calling us back.
-        if (requestCode == REQUEST_PATH){
-            if (resultCode == RESULT_OK) {
-                curFileName = data.getStringExtra("GetFileName");
-                edittext.setText(curFileName);
+                @Override
+                public void run() {
+                    Toast.makeText(MessageActivity.this, "Finished", Toast.LENGTH_SHORT).show();
+                }
+            });
+            if (socket != null) {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         }
     }
-    }
+}

@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content" android:orientation="vertical" android:layout_width="fill_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:columnCount="1"
+    android:gravity="center_horizontal"
+    android:useDefaultMargins="false"
+    android:rowCount="14"
+    android:background="#1c2125"
+    android:fontFamily="sans-serif-condensed"
+    android:alignmentMode="alignBounds"
+    android:padding="0dp">
     <ImageView
         android:id="@+id/fd_Icon1"
         android:layout_width="50dip"
@@ -14,12 +24,14 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:textStyle="bold"
+        android:textColor="#f6f4ff"
         android:layout_toRightOf="@+id/fd_Icon1"
         android:layout_marginTop="5dip"
         android:layout_marginLeft="5dip">
     </TextView>
     <TextView android:text="@+id/TextView02"
         android:id="@+id/TextView02"
+        android:textColor="#f6f4ff"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/fd_Icon1"
@@ -29,6 +41,7 @@
     </TextView>
     <TextView android:text="@+id/TextViewDate"
         android:id="@+id/TextViewDate"
+        android:textColor="#f6f4ff"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/TextView01"

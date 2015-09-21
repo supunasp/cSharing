@@ -1,7 +1,10 @@
-package com.example.supunathukorala.csharing;
+package com.example.supunathukorala.csharing.filebrowser;
+
+import android.support.annotation.NonNull;
 
 /**
- * Created by Supun Athukorala on 9/15/2015 1:26 PM.
+ * Created by Supun Athukorala on 9/15/2015 1:26 PM
+ * 11:12 PM.
  */
 public class Item implements Comparable<Item>{
     private String name;
@@ -37,7 +40,7 @@ public class Item implements Comparable<Item>{
     public String getImage() {
         return image;
     }
-    public int compareTo(Item o) {
+    public int compareTo(@NonNull Item o) {
         if(this.name != null)
             return this.name.toLowerCase().compareTo(o.getName().toLowerCase());
         else

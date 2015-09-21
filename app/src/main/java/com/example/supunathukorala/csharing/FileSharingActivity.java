@@ -15,6 +15,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.supunathukorala.csharing.wifimanager.ClientScanResult;
+import com.example.supunathukorala.csharing.wifimanager.WifiApiManager;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -95,16 +98,16 @@ public class FileSharingActivity extends Activity {
                     values = new String[clients.size()];
                     for (int i = 0; i < clients.size(); i++) {
                         clientScanResult = clients.get(i);
-                        values[i] = "IpAddress: " + clientScanResult.getIpAddr();
+                        values[i] = "IpAddress: " + clientScanResult.getIpAddress();
                     }
-                    adapter = new ArrayAdapter<>(FileSharingActivity.this, android.R.layout.simple_list_item_1, android.R.id.text1, values);
+                    adapter = new ArrayAdapter<>(FileSharingActivity.this, R.layout.list_white_text, R.id.list_content, values);
                     listView.setAdapter(adapter);
                     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            Toast.makeText(getApplicationContext(), clients.get(position).getIpAddr(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), clients.get(position).getIpAddress(), Toast.LENGTH_SHORT).show();
 
-                            sendMessage sendImage = new sendMessage(imageUri, clients.get(position).getIpAddr());
+                            sendMessage sendImage = new sendMessage(imageUri, clients.get(position).getIpAddress());
                             sendImage.execute((Void) null);
 
 
@@ -131,8 +134,8 @@ public class FileSharingActivity extends Activity {
         @Override
         protected Boolean doInBackground(Void... params) {
 
-            ClientRxThread clientRxThread = new ClientRxThread(ipAddress, SocketServerPORT);
-            clientRxThread.start();
+            ClientSenderThread clientSenderThread = new ClientSenderThread(ipAddress, SocketServerPORT);
+            clientSenderThread.start();
 
             Intent intent = new Intent(FileSharingActivity.this,MessageActivity.class);
             intent.putExtra("name", username);
@@ -153,11 +156,11 @@ public class FileSharingActivity extends Activity {
         return returnPath;
     }
 
-    private class ClientRxThread extends Thread {
+    private class ClientSenderThread extends Thread {
         String dstAddress;
         int dstPort;
 
-        ClientRxThread(String address, int port) {
+        ClientSenderThread(String address, int port) {
             dstAddress = address;
             dstPort = port;
         }
@@ -169,8 +172,8 @@ public class FileSharingActivity extends Activity {
             try {
                 socket = new Socket(dstAddress, dstPort);
 
-                FileTxThread fileTxThread = new FileTxThread(socket);
-                fileTxThread.start();
+                FileTransferThread fileTransferThread = new FileTransferThread(socket);
+                fileTransferThread.start();
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -178,10 +181,10 @@ public class FileSharingActivity extends Activity {
         }
     }
 
-    public class FileTxThread extends Thread {
+    public class FileTransferThread extends Thread {
         Socket socket;
 
-        FileTxThread(Socket socket){
+        FileTransferThread(Socket socket){
             this.socket= socket;
         }
 

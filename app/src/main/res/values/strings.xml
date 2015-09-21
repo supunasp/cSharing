@@ -11,5 +11,13 @@
     <string name="createButton">create</string>
     <string name="title_activity_file_chooser">FileChooser</string>
     <string name="title_activity_private_chat">PrivateChatActivity</string>
+    <string name="title_activity_client_select">ClientSelectActivity</string>
+    <string name="appName">cSharing</string>
+    <string name="userName">User Name</string>
+    <string name="startServer">start Server</string>
+    <string name="connectClient">connect Client</string>
+    <string name="share">share</string>
+    <string name="send">Send</string>
+    <string name="selectFile">select File</string>
 
 </resources>

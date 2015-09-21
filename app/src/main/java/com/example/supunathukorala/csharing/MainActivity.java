@@ -54,7 +54,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 joinOne.execute((Void) null);
                 break;
             case R.id.buttonPrivate:
-                 i = new Intent(MainActivity.this, MessageActivity.class);
+                 i = new Intent(MainActivity.this, ClientSelectActivity.class);
                  user = (EditText) findViewById(R.id.userName);
                 i.putExtra("name", user.getText().toString());
                 startActivity(i);

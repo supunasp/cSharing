@@ -1,17 +1,19 @@
-package com.example.supunathukorala.csharing;
+package com.example.supunathukorala.csharing.wifimanager;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import android.content.Context;
-import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.util.Log;
+
+import com.example.supunathukorala.csharing.wifimanager.ClientScanResult;
+
 /**
- * Created by Supun Athukorala on 9/9/2015.
+ * Created by Supun Athukorala on 9/9/2015
+ * 11:15 PM.
  */
 
 public class WifiApiManager {
@@ -20,19 +22,9 @@ public class WifiApiManager {
     public WifiApiManager(Context context) {
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
-
-
-
-    /**
-     * Gets a list of the clients connected to the Hotspot, reachable timeout is 300
-     */
     public ArrayList<ClientScanResult> getClientList(boolean onlyReachables) {
         return getClientList(onlyReachables, 300);
     }
-
-    /**
-     * Gets a list of the clients connected to the Hotspot
-     */
     public ArrayList<ClientScanResult> getClientList(boolean onlyReachables, int reachableTimeout) {
         BufferedReader br = null;
         ArrayList<ClientScanResult> result = null;
@@ -66,7 +58,6 @@ public class WifiApiManager {
                 Log.e(this.getClass().toString(), e.getMessage());
             }
         }
-
         return result;
     }
 }
